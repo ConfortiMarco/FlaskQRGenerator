@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block title %}{{current_user.username}}'s History{% endblock %}
+
+{% block name %}{{current_user.username}}{% endblock %}
+
+{% block content %}
+<div class="h1 text-center">QR Generato</div>
+<img src="data:image/png;base64,{{url}}">
+{% endblock %}

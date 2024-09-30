@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}{{current_user.username}}'s History{% endblock %}
+
+{% block name %}{{current_user.username}}{% endblock %}
+
+{% block content %}
+
+{%for qrcode in qrcodes%}
+<div class="row">
+    <div class="h1 text-center">{{qrcode.link}}</div>
+</div>
+<div class="row">
+    <div class="col-3">
+
+    </div>
+    <div class="col">
+        <ul>
+            <li>Back: {{qrcode.background_color}}</li>
+            <li>Fill: {{qrcode.fill_color}}</li>
+            <li>Size: {{qrcode.size}}</li>
+            <li>File: {{qrcode.file}}</li>
+        </ul>
+    </div>
+    <div class="col">
+        <img src="data:image/png;base64,{{qrcode.qr_base64}}" alt="">
+    </div>
+</div>
+<hr>
+{%endfor%}
+
+{% endblock %}

@@ -1,0 +1,40 @@
+
+{% extends "base.html" %}
+
+{% block title %}Create New QR{% endblock %}
+
+{% block name %}{{current_user.username}}{% endblock %}
+
+{% block content %}
+<h1 class="text-center">Creazione di un nuovo codice QR</h1>
+<form method="post" action="/home" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label for="url" class="form-label">Inserire un link o un testo: </label>
+        <input class="form-control" placeholder="https://moodle.edu.ti.ch" id="url" type="text" name="url" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="coloresfondo" class="form-label">Inserire colore di sfondo (default bianco): </label>
+        <input class="form-control" id="coloresfondo" type="color" name="coloresfondo" value="#ffffff" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="coloreriempimento" class="form-label">Inserire colore del codice (default nero): </label>
+        <input class="form-control" id="coloreriempimento" type="color" name="coloreriempimento" value="#000000" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="grandezza" class="form-label">Inserire grandezza: </label>
+        <input class="form-range" id="grandezza" type="range" name="grandezza" min="1" max="10" value="5" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="immagine" class="form-label">Inserire immagine: </label>
+        <input class="form-control" id="immagine" type="file" name="immagine">
+    </div>
+
+    <div class="mb-3">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+{% endblock %}
