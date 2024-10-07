@@ -3,6 +3,8 @@
 
 {% block title %}Flask Profile{% endblock %}
 
+{% block name %}<a href="/auth/logout">Logout</a>{% endblock %}
+
 {% block content %}
 <h1 class="title"> Welcome {{ name }} </h1>
 <h2>Questa è la tua chiave API: <strong>{{ apikey }}</strong></h2>
