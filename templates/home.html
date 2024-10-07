@@ -3,7 +3,7 @@
 
 {% block title %}Create New QR{% endblock %}
 
-{% block name %}{{current_user.username}}{% endblock %}
+{% block name %}<a href="/auth/profile">{{current_user.username}}</a>{% endblock %}
 
 {% block content %}
 <h1 class="text-center">Creazione di un nuovo codice QR</h1>

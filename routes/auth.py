@@ -9,6 +9,7 @@ from flask_login import login_user  # https://flask-login.readthedocs.io/en/late
 from flask_login import login_required
 from flask_login import logout_user, current_user
 from functools import wraps
+import uuid
 
 from models.conn import db
 from models.model import *
@@ -45,7 +46,9 @@ def login_post():
 @auth.route('/profile')
 @login_required
 def profile():
-    return render_template('/', name=current_user.username)
+    user = User.query.filter_by(id=current_user.id).first()
+    api = user.get_api_keys().first()
+    return render_template('/auth/profile.html', name=current_user.username, apikey=api.value)
 
 @auth.route('/signup')
 def signup():
@@ -81,6 +84,9 @@ def signup_post():
     db.session.add(user)  # equivalente a INSERT
     db.session.commit()
 
+    # Create API KEY
+    api_key = str(uuid.uuid4())
+    user.set_api_key(api_key)
     return redirect(url_for('auth.login'))
 
 @auth.route('/logout')

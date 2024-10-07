@@ -5,6 +5,7 @@ import qrcode
 from PIL import Image
 from flask_migrate import Migrate
 from routes.auth import auth as bp_auth
+from routes.api import api as bp_api
 import os
 import base64
 import io
@@ -16,14 +17,11 @@ load_dotenv()
 
 app = Flask(__name__)
 
-#QRcode(app)
-
-ALLOWED_EXTENSIONS = {'png'}
-
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER')
 app.register_blueprint(bp_auth,url_prefix="/auth")
+app.register_blueprint(bp_api,url_prefix="/api")
 
 # flask_login user loader block
 login_manager = LoginManager()
@@ -44,23 +42,6 @@ def load_user(user_id):
 @login_required
 def home():
     return render_template('home.html')
-
-''' old method
-@app.route('/home',methods=['POST'])
-def set_link():
-    url = request.form['url']
-    back_color = request.form['coloresfondo']
-    fill_color = request.form['coloreriempimento']
-    box_size = request.form['grandezza']
-    file = request.files['immagine']
-    if file.filename != '':     
-        dt = datetime.datetime.now()
-        filename = secure_filename(str(dt.microsecond)+"_"+file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    qrs= "qrcode(url,error_correction='H',icon_img='python.png',box_size=10)"
-    current_app.logger.info(f"qr generator: {qrs}")
-    return render_template('info.html',url=url,back="fff")
-'''
 
 @app.route('/home',methods=['POST'])
 @login_required
@@ -109,7 +90,6 @@ def set_link():
     db.session.add(qrcode_db) 
     db.session.commit()
 
-    current_app.logger.info(f"qr generator: {img_base64}")
     return render_template('info.html',url=img_base64)
 
 @app.route('/history')
