@@ -2,7 +2,7 @@
 
 {% block title %}{{current_user.username}}'s History{% endblock %}
 
-{% block name %}{{current_user.username}}{% endblock %}
+{% block name %}<a href="/auth/profile">{{current_user.username}}</a>{% endblock %}
 
 {% block content %}
 
@@ -21,6 +21,9 @@
             <li>Size: {{qrcode.size}}</li>
             <li>File: {{qrcode.file}}</li>
         </ul>
+        <form action="/download/{{qrcode.id}}" method="post">
+            <button type="" class="btn btn-primary">Download qrcode</button>
+        </form>
     </div>
     <div class="col">
         <img src="data:image/png;base64,{{qrcode.qr_base64}}" alt="">

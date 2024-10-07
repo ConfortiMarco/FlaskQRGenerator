@@ -6,7 +6,19 @@
 {% block name %}<a href="/auth/profile">{{current_user.username}}</a>{% endblock %}
 
 {% block content %}
+
 <h1 class="text-center">Creazione di un nuovo codice QR</h1>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class="text-danger">
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
 <form method="post" action="/home" enctype="multipart/form-data">
     <div class="mb-3">
         <label for="url" class="form-label">Inserire un link o un testo: </label>

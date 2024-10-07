@@ -9,6 +9,7 @@ import io
 import datetime
 from werkzeug.utils import secure_filename
 
+
 api = Blueprint('api', __name__)
 
 @api.route('/')
@@ -16,7 +17,7 @@ def home():
     api_key = ApiKey.query.filter_by(value=request.headers.get('X-API-Key')).first()
     if api_key: 
         user = api_key.user
-        return f'Accesso per {user.username} tramite API'
+        return f'Accesso per {user.username} tramite API key'
     else:
         return 'chiave non valida'
 
@@ -30,6 +31,16 @@ def set_link():
         box_size = request.form['grandezza']
         file = request.files['immagine']
         filename_public = None
+
+        if not url:
+            return "error no url"
+
+        if not back_color:
+            return "error no url"
+
+        if not fill_color:
+            return "error no url"
+    
         if file.filename != '':     
             dt = datetime.datetime.now()
             filename = secure_filename(str(dt.microsecond)+"_"+file.filename)
@@ -67,7 +78,6 @@ def set_link():
         qrcode_db = QrCode(link=url,background_color=back_color,fill_color=fill_color,size=box_size,file=filename_public,qr_base64=img_base64,user_id=api_key.user_id)
         db.session.add(qrcode_db) 
         db.session.commit()
-
         return img_base64
     else:
         return "chiave non valida"

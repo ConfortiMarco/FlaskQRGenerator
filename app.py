@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, send_file, flash, redirect, url_for, jsonify
 from models.conn import db 
 from models.model import * 
 import qrcode
@@ -11,8 +11,9 @@ import base64
 import io
 import datetime
 from werkzeug.utils import secure_filename
-from dotenv import load_dotenv
 from flask_login import LoginManager, login_required, current_user
+from flask_swagger import swagger
+from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
@@ -20,8 +21,16 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER')
+app.config['QR_UPLOAD_FOLDER'] = os.getenv('QR_UPLOAD_FOLDER')
 app.register_blueprint(bp_auth,url_prefix="/auth")
 app.register_blueprint(bp_api,url_prefix="/api")
+
+@app.route('/swagger')
+def swagger_spec():
+    swag = swagger(app)
+    swag['info']['title'] = "API"
+    swag['info']['description'] = "This is the API documentation"
+    return jsonify(swag)
 
 # flask_login user loader block
 login_manager = LoginManager()
@@ -52,6 +61,22 @@ def set_link():
     box_size = request.form['grandezza']
     file = request.files['immagine']
     filename_public = None
+
+    if not url:
+        flash('Invalid url')
+        return redirect('/')
+
+    if not back_color:
+        flash('Invalid colore di sfondo')
+        return redirect('/')
+
+    if not fill_color:
+        flash('Invalid colore di riempimento')
+        return redirect('/')
+    
+    if not box_size:
+        box_size = 5
+
     if file.filename != '':     
         dt = datetime.datetime.now()
         filename = secure_filename(str(dt.microsecond)+"_"+file.filename)
@@ -85,10 +110,15 @@ def set_link():
     buffered = io.BytesIO()
     QRimg.save(buffered, format="PNG")
     img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+    
+    b64_string =img_base64
 
     qrcode_db = QrCode(link=url,background_color=back_color,fill_color=fill_color,size=box_size,file=filename_public,qr_base64=img_base64,user_id=current_user.id)
     db.session.add(qrcode_db) 
     db.session.commit()
+
+    with open(app.config['QR_UPLOAD_FOLDER']+"qr"+str(qrcode_db.id)+".png",'wb') as file:
+        file.write(base64.decodebytes(b64_string.encode()))
 
     return render_template('info.html',url=img_base64)
 
@@ -97,6 +127,19 @@ def set_link():
 def history():
     qr_codes = db.session.execute(db.select(QrCode).filter_by(user_id=current_user.id)).scalars().all()
     return render_template('history.html',qrcodes=qr_codes)
+
+@app.route('/download/<id>',methods=['POST'])
+@login_required
+def download(id):
+    qr_codes = db.session.execute(db.select(QrCode).filter_by(id=id)).scalars().first()
+    if qr_codes:
+        if qr_codes.user_id == current_user.id:
+            uploads = os.path.join(current_app.root_path, app.config['QR_UPLOAD_FOLDER'])
+            return send_file(uploads+'qr'+id+".png", as_attachment=True)
+        else:
+            return "Non è un stato possibile scaricare il qr"
+    else:
+        return "Non è un stato possibile scaricare il qr"
 
 db.init_app(app)
 migrate = Migrate(app, db)
