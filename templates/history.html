@@ -21,7 +21,7 @@
             <li>Size: {{qrcode.size}}</li>
             <li>File: {{qrcode.file}}</li>
         </ul>
-        <form action="/download/{{qrcode.id}}" method="post">
+        <form action="/download/{{qrcode.id}}" method="get">
             <button type="" class="btn btn-primary">Download qrcode</button>
         </form>
     </div>

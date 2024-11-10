@@ -10,32 +10,41 @@ import os
 import base64
 import io
 import datetime
+import uuid
 from werkzeug.utils import secure_filename
 from flask_login import LoginManager, login_required, current_user
-from flask_swagger import swagger
+from flask_swagger_ui import get_swaggerui_blueprint
 from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
 
+
+
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER')
 app.config['QR_UPLOAD_FOLDER'] = os.getenv('QR_UPLOAD_FOLDER')
+app.config['SWAGGER_URL'] = os.getenv('SWAGGER_URL')
+app.config['API_URL'] = os.getenv('API_URL')
 app.register_blueprint(bp_auth,url_prefix="/auth")
 app.register_blueprint(bp_api,url_prefix="/api")
 
-@app.route('/swagger')
-def swagger_spec():
-    swag = swagger(app)
-    swag['info']['title'] = "API"
-    swag['info']['description'] = "This is the API documentation"
-    return jsonify(swag)
+
+swagger_ui_blueprint = get_swaggerui_blueprint(
+    app.config['SWAGGER_URL'],
+    app.config['API_URL'],
+    config={
+        'app_name': 'Access API'
+    }
+)
+app.register_blueprint(swagger_ui_blueprint, url_prefix=app.config['SWAGGER_URL'])
 
 # flask_login user loader block
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 login_manager.init_app(app)
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -79,7 +88,7 @@ def set_link():
 
     if file.filename != '':     
         dt = datetime.datetime.now()
-        filename = secure_filename(str(dt.microsecond)+"_"+file.filename)
+        filename = secure_filename(str(uuid.uuid4())+"_"+file.filename)
         filename_public = filename
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     qr = qrcode.QRCode(
@@ -128,7 +137,7 @@ def history():
     qr_codes = db.session.execute(db.select(QrCode).filter_by(user_id=current_user.id)).scalars().all()
     return render_template('history.html',qrcodes=qr_codes)
 
-@app.route('/download/<id>',methods=['POST'])
+@app.route('/download/<id>',methods=['GET'])
 @login_required
 def download(id):
     qr_codes = db.session.execute(db.select(QrCode).filter_by(id=id)).scalars().first()

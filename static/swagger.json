@@ -1,0 +1,31 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "Flask API",
+        "version": "1.0.0"
+    },
+    "servers": [
+        { "url": "http://localhost:5000" }
+    ],
+    "tags": [
+        { "name": "qr_codes", "description": "CRUD Operations" }
+    ],
+    "paths": {
+        "/": {
+            "get": {
+                "tags": ["qr_codes"],
+                "summary": "Retrieve all qr_codes",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": { "$ref": "#/components/schemas/QrCode" }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

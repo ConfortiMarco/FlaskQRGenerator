@@ -1,7 +1,9 @@
 venv/
 .env
 __pycache__/
+static/images/*
 uploads/img/*
 uploads/qr/*
 !uploads/img/.gitkeep
 !uploads/qr/.gitkeep
+!static/images/.gitkeep
